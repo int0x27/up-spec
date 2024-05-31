@@ -62,7 +62,7 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 
 .UUri Mapping
 [[uri-mapping]]
-[cols="15%m,25%m,60%a", options="header"]
+[cols="10%m,30%m,60%a", options="header"]
 |===
 | UUri Portion | SOME/IP Field | Description
 
