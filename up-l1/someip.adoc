@@ -69,7 +69,8 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 | authority_name | IP:port
 | * IP address & port (destination endpoint) of the mDevice.
 
-NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. *SHOULD* be left blank or mapped via static transport configuration.
+NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. +
+*SHOULD* be left blank or mapped via static transport configuration.
 
 | ue_id | InstanceID\|ServiceID
 | 
