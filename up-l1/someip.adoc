@@ -62,7 +62,7 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 
 .UUri Mapping
 [[uri-mapping]]
-[cols="1a,1a,3a", width="100%", options="header"]
+[cols="1a,1a,3a", options="header"]
 |===
 | UUri Portion | SOME/IP Field | Description
 
@@ -101,12 +101,12 @@ NOTES::
 
 .SOME/IP to uAttributes Sink & Source Mapping
 [[uattribute-mapping]]
-[cols=".^m,.^m,.^m,.^m,.^m,.^m,.^m,.^m", width="100%", options="autowidth"]
+[cols=".^m,.^m,.^m,.^m,.^m,.^m,.^m,.^m", options="autowidth"]
 |===
 .2+^.^h| UMessageType .2+^.^h| SOME/IP Type 2+^.^h| Message ID 2+^.^h| Request ID .2+^.^h| Interface Version .2+^.^h| Return Code (commstatus)
-^.^h| ServiceID ^.^h| MethodID ^.^h| ClientID ^.^h| SessionID 
+^.^h| ServiceID ^.^h| MethodID ^.^h| ClientID link:#note-4[^(4)^] ^.^h| SessionID 
 
-| NOTIFICATION  | REQUEST_NO_RETURN (0x01) m| sink.ue_id link:#note-1[^(1)^]   | sink.resource_id   | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   | 
+| NOTIFICATION  | REQUEST_NO_RETURN (0x01) link:#note-5[^(5)^] | sink.ue_id link:#note-1[^(1)^]   | sink.resource_id   | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   | 
 
 | PUBLISH       | NOTIFICATION (0x02)      | source.ue_id link:#note-1[^(1)^]  | source.resource_id | sink.ue_id=0    | link:#note-2[^(2)^]       | source.ue_major_version |
 
@@ -120,8 +120,8 @@ NOTES::
  * [[note-1]] ^(1)^ Maps to lower 16 bits of `ue_id`
  * [[note-2]] ^(2)^ Using session handling so value is increased by 1 until max `0xFFFF` and mapped to `UAttributes.id`
  * [[note-3]] ^(3)^ `source.ue_version_major` missing!
- * `Client ID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
- * `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `Method ID`, but in uProtocol `NOTIFICATION` applies for `Event ID`.
+ * [[note-4]] ^(4)^ `Client ID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
+ * [[note-5]] ^(5)^  `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `Method ID`, but in uProtocol `NOTIFICATION` applies for `Event ID`.
 
 
 
