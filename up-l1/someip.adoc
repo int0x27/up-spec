@@ -62,17 +62,17 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 
 .UUri Mapping
 [[uri-mapping]]
-[cols="20%m,20%m,60%a", options="header"]
+[cols="15%m,25%m,60%a", options="header"]
 |===
 | UUri Portion | SOME/IP Field | Description
 
-| authority_name m| IP address & port
+| authority_name | IP address & port
 | IP address & port (destination endpoint) of the mDevice.
 
 NOTE: *vsomeip* hides IP endpoint information and uses `Service ID` / `Instance ID` instead. *SHOULD* be left blank or mapped (as)
 
 | ue_id | Instance ID \| Service ID
-a| `Service ID` *MUST* be encoded in the lower 16 bits of `ue_id`.
+| `Service ID` *MUST* be encoded in the lower 16 bits of `ue_id`.
 
 `Instance ID` *MAY* be encoded in the upper 16 bits of the 32 bit `ue_id`.
 If the upper 16 bits are `0x0000` (a reserved instance value), `Instance ID` is assumed to be `1`.
@@ -84,7 +84,7 @@ NOTE: Explicitly setting `Instance ID` to `0x0001` *SHOULD* be avoided as it inc
 
 Maps to `Major Version` for the `Service ID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
 
-| resource_id m| Method ID / Event ID a| Identifier of the method/event placed in the
+| resource_id | Method ID / Event ID | Identifier of the method/event placed in the
 lower 16 bits of the *SOME/IP Header* `Message ID`. `[PRS_SOMEIP_00034]`
 
 |===
