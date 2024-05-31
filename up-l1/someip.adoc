@@ -62,38 +62,38 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 
 .UUri Mapping
 [[uri-mapping]]
-[width="100%",cols="10%,30%,60%", options="header"]
+[cols="10%m,30%m,60%a",width="100%",options="header,autowidth"]
 |===
-m| UUri Portion m| SOME/IP Field a| Description
+| UUri Portion | SOME/IP Field | Description
 
-m| authority_name m| IP address & port
-a| IP address & port (destination endpoint) of the mDevice.
+| authority_name | IP:port
+| IP address & port (destination endpoint) of the mDevice.
 
-NOTE: *vsomeip* hides IP endpoint information and uses `Service ID` / `Instance ID` instead. *SHOULD* be left blank or mapped (as)
+NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. *SHOULD* be left blank or mapped (as)
 
-m| ue_id m| Instance ID \| Service ID
-a| `Service ID` *MUST* be encoded in the lower 16 bits of `ue_id`.
+| ue_id | InstanceID\|ServiceID
+| `ServiceID` *MUST* be encoded in the lower 16 bits of `ue_id`.
 
-`Instance ID` *MAY* be encoded in the upper 16 bits of the 32 bit `ue_id`.
-If the upper 16 bits are `0x0000` (a reserved instance value), `Instance ID` is assumed to be `1`.
+`InstanceID` *MAY* be encoded in the upper 16 bits of the 32 bit `ue_id`.
+If the upper 16 bits are `0x0000` (a reserved instance value), `InstanceID` is assumed to be `1`.
 
-NOTE: Explicitly setting `Instance ID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
+NOTE: Explicitly setting `InstanceID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
 
-m| ue_version_major m| Interface Version
-a| `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
+| ue_version_major | Interface Version
+| `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
 
-Maps to `Major Version` for the `Service ID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
+Maps to `Major Version` for the `ServiceID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
 
-m| resource_id m| Method ID / Event ID a| Identifier of the method/event placed in the
+| resource_id | MethodID/EventID | Identifier of the method/event placed in the
 lower 16 bits of the *SOME/IP Header* `Message ID`. `[PRS_SOMEIP_00034]`
 
 |===
 
 NOTES::
-* `Service ID` and `Method ID` are defined in *SOME/IP Header format*, specified by AUTOSAR `[PRS_SOMEIP_00030]`.
-* `Event ID` is an alias for `Method ID`, but used for events. `[PRS_SOMEIP_00245]`
-* `Instance ID` is defined in *SOME/IP-SD Service Entry Type*, specified by AUTOSAR `[PRS_SOMEIPSD_00268]`.
-* `Instance ID` is not present in *SOME/IP Header*, but is needed for _Service Discovery_ and events and *MUST* be provided for SOME/IP libraries (e.g. `vsomeip`). `[PRS_SOMEIP_00162]`
+* `ServiceID` and `MethodID` are defined in *SOME/IP Header format*, specified by AUTOSAR `[PRS_SOMEIP_00030]`.
+* `EventID` is an alias for `MethodID`, but used for events. `[PRS_SOMEIP_00245]`
+* `InstanceID` is defined in *SOME/IP-SD Service Entry Type*, specified by AUTOSAR `[PRS_SOMEIPSD_00268]`.
+* `InstanceID` is not present in *SOME/IP Header*, but is needed for _Service Discovery_ and events and *MUST* be provided for SOME/IP libraries (e.g. `vsomeip`). `[PRS_SOMEIP_00162]`
 * Additional mappings *MAY* be required by the underlying SOME/IP library, e.g. Service Major/Minor version. Such values *MAY* be pre-configured
 
 
@@ -121,7 +121,7 @@ NOTES::
  * [[note-2]] ^(2)^ Using session handling so value is increased by 1 until max `0xFFFF` and mapped to `UAttributes.id`
  * [[note-3]] ^(3)^ `source.ue_version_major` missing!
  * [[note-4]] ^(4)^ `Client ID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
- * [[note-5]] ^(5)^  `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `Method ID`, but in uProtocol `NOTIFICATION` applies for `Event ID`.
+ * [[note-5]] ^(5)^  `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies for `EventID`.
 
 
 
@@ -240,20 +240,20 @@ These fields are then mapped to uProtocol `UUri` attributes used in uProtocol `U
 |===
 | Eventgroup Entry Field | UUri
 
-| Service ID a| Set in lower 16 bits of `ue_id`
+| ServiceID | Set in lower 16 bits of `ue_id`
 
-| Instance ID a| If instance is not the default (`0x1`), set it in upper 16 bits of `ue_id`
+| InstanceID a| If instance is not the default (`0x1`), set it in upper 16 bits of `ue_id`
 
 | Major Version a| `ue_version_major`
 
-| EventGroup ID / Event ID a| `resource_id`
+| EventGroup ID / EventID a| `resource_id`
 
-NOTE: `1:1` mapping between `EventGroup ID` and `Event ID` is assumed. This may require specific ECU Firmware.
+NOTE: `1:1` mapping between `EventGroup ID` and `EventID` is assumed. This may require specific ECU Firmware.
 
 
 |===
 
-NOTE: `UUri.authority_name` *MAY* be translated to/from IPv4 (and/or IPv6) Endpoint Option of the *SOME/IP-SD* message, although in `vsomeip` this is not available in the API (e.g. each discovered Endpoint maps to `Service ID`/`Instance ID`/`Major Version`/`Minor Version`).
+NOTE: `UUri.authority_name` *MAY* be translated to/from IPv4 (and/or IPv6) Endpoint Option of the *SOME/IP-SD* message, although in `vsomeip` this is not available in the API (e.g. each discovered Endpoint maps to `ServiceID`/`InstanceID`/`Major Version`/`Minor Version`).
 
 <<eventgroup-entry-mapping>> table below illustrates the mapping of *SOME/IP-SD* Eventgroup Entry types to *uSubscription* messages for the subscribe and unsubscribe flows.
 
