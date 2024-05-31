@@ -67,25 +67,25 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 | UUri Portion | SOME/IP Field | Description
 
 | authority_name | IP:port
-| IP address & port (destination endpoint) of the mDevice.
+| * IP address & port (destination endpoint) of the mDevice.
 
-NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. *SHOULD* be left blank or mapped (as)
+NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. *SHOULD* be left blank or mapped via static transport configuration.
 
 | ue_id | InstanceID\|ServiceID
-| `ServiceID` *MUST* be encoded in the lower 16 bits of `ue_id`.
-
-`InstanceID` *MAY* be encoded in the upper 16 bits of the 32 bit `ue_id`.
-If the upper 16 bits are `0x0000` (a reserved instance value), `InstanceID` is assumed to be `1`.
-
-NOTE: Explicitly setting `InstanceID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
+| 
+* `ServiceID` *MUST* be encoded in the lower 16 bits of the 32 bit `ue_id`.
+* `InstanceID` *MAY* be encoded in the upper 16 bits of `ue_id`.
+* If the upper 16 bits are `0x0000` (a reserved instance value), `InstanceID` is assumed to be `1`.
+* Explicitly setting `InstanceID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
 
 | ue_version_major | Interface Version
-| `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
+| 
+* `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
+* Maps to `Major Version` for the `ServiceID`.
+* If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
 
-Maps to `Major Version` for the `ServiceID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
-
-| resource_id | MethodID/EventID | Identifier of the method/event placed in the
-lower 16 bits of the *SOME/IP Header* `Message ID`. `[PRS_SOMEIP_00034]`
+| resource_id | MethodID/EventID |
+* Identifier of the method/event placed in the lower 16 bits of the *SOME/IP Header* `MessageID`. `[PRS_SOMEIP_00034]`
 
 |===
 
@@ -103,7 +103,7 @@ NOTES::
 [[uattribute-mapping]]
 [cols=".^m,.^m,.^m,.^m,.^m,.^m,.^m,.^m", options="autowidth"]
 |===
-.2+^.^h| UMessageType .2+^.^h| SOME/IP Type 2+^.^h| Message ID 2+^.^h| Request ID .2+^.^h| Interface Version .2+^.^h| Return Code (commstatus)
+.2+^.^h| UMessageType .2+^.^h| SOME/IP Type 2+^.^h| MessageID 2+^.^h| RequestID .2+^.^h| Interface Version .2+^.^h| Return Code (commstatus)
 ^.^h| ServiceID ^.^h| MethodID ^.^h| ClientID link:#note-4[^(4)^] ^.^h| SessionID 
 
 | NOTIFICATION  | REQUEST_NO_RETURN (0x01) link:#note-5[^(5)^] | sink.ue_id link:#note-1[^(1)^]   | sink.resource_id   | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   | 
@@ -120,8 +120,8 @@ NOTES::
  * [[note-1]] ^(1)^ Maps to lower 16 bits of `ue_id`
  * [[note-2]] ^(2)^ Using session handling so value is increased by 1 until max `0xFFFF` and mapped to `UAttributes.id`
  * [[note-3]] ^(3)^ `source.ue_version_major` missing!
- * [[note-4]] ^(4)^ `Client ID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
- * [[note-5]] ^(5)^  `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies for `EventID`.
+ * [[note-4]] ^(4)^ `ClientID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
+ * [[note-5]] ^(5)^ `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies for `EventID`.
 
 
 
@@ -130,12 +130,12 @@ NOTES::
 
 link:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
 
-The ID is used for correlate between request and response as well. SOME/IP instead defines the `Request ID` as 16 bit `Client ID` + 16 bit `Session ID` (that is incremented). `[PRS_SOMEIP_00046]`
+The *UUid* is used for correlate between request and response as well. SOME/IP instead defines the `RequestID` as 16 bit `ClientID` + 16 bit `SessionID` (that is incremented). `[PRS_SOMEIP_00046]`
 
-When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `Request ID` and uProtocol `UUID` are properly mapped, especially when corelating a request to a response.
+When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `RequestID` and uProtocol `UUID` are properly mapped, especially when corelating a request to a response.
 
-* Generated SOME/IP Events *MUST* set the 16 bit `Client ID` to 0 per `[PRS_SOMEIP_00925]`
-* Generated SOME/IP Responses *MUST* auto-populate the `Request ID` cached from the request message, into the response message and then flush the entry in the cache.
+* Generated SOME/IP Events *MUST* set the 16 bit `ClientID` to 0 per `[PRS_SOMEIP_00925]`
+* Generated SOME/IP Responses *MUST* auto-populate the `RequestID` cached from the request message, into the response message and then flush the entry in the cache.
 
 Further details of the usage of IDs for the various message types can be found in the next section.
 
@@ -174,12 +174,12 @@ response.reqid = request.id
 
 * When sending auto-generated SOME/IP *REQUEST* messages:
 
-  ** *MUST* cache the message's `Request ID` to correlate with the RESPONSE message.
-  ** Underlying SOME/IP library *SHOULD* handle `Request ID` updating.
+  ** *MUST* cache the message's `RequestID` to correlate with the RESPONSE message.
+  ** Underlying SOME/IP library *SHOULD* handle `RequestID` updating.
 
 When receiving a SOME/IP initiated requests:
 
-  * *MUST* cache the SOME/IP `Request ID` as well as the generated `UAttributes` for the request messages so that the response can be translated back to a SOME/IP _RESPONSE_ message
+  * *MUST* cache the SOME/IP `RequestID` as well as the generated `UAttributes` for the request messages so that the response can be translated back to a SOME/IP _RESPONSE_ message
 
 
 ==== Communication Status
@@ -246,9 +246,9 @@ These fields are then mapped to uProtocol `UUri` attributes used in uProtocol `U
 
 | Major Version a| `ue_version_major`
 
-| EventGroup ID / EventID a| `resource_id`
+| EventGroupID / EventID | `resource_id`
 
-NOTE: `1:1` mapping between `EventGroup ID` and `EventID` is assumed. This may require specific ECU Firmware.
+NOTE: `1:1` mapping between `EventGroupID` and `EventID` is assumed. This may require specific ECU Firmware.
 
 
 |===
