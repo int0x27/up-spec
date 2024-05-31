@@ -249,7 +249,8 @@ These fields are then mapped to uProtocol `UUri` attributes used in uProtocol `U
 
 | EventGroupID / EventID | `resource_id`
 
-NOTE: `1:1` mapping between `EventGroupID` and `EventID` is assumed. This may require specific ECU Firmware.
+NOTE: `1:1` mapping between `EventGroupID` and `EventID` is assumed. +
+This may require specific ECU Firmware.
 
 
 |===
@@ -268,7 +269,8 @@ h| Eventgroup Entry Type h| uSubscription Message h| Additional Details
 
 * If `SubscribeAttributes.expire` is not set, `TTL` *MAY* be set to `0xFFFFFF` to indicate that the subscription should remain for the duration of the ignition cycle
 
-NOTE: `vsomeip` has static TTL configuration (for Service Discovery), that applies for all subscriptions. It can't be changed per subscription.
+NOTE: `vsomeip` has static TTL configuration (for Service Discovery), that applies for all subscriptions. +
+It can't be changed per subscription.
 
 | `SubscribeEventGroupAck` | `SubscriptionResponse` | The message is used to acknowledge a successful subscription request.
 
