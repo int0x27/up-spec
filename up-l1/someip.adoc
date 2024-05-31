@@ -56,17 +56,17 @@ A search engine usually finds the correct document based on the reference number
 
 The following table highlights the mapping of *uAttributes* to *SOME/IP* fields that apply to all event types. For more information about *uAttributes*, please refer to link:../basics/uattributes.adoc[uAttributes Specification].
 
-==== Uris
+==== UUris
 
 *uAttributes Specification* explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message in link:../basics/uri.adoc[`UUri`] format. `UUri` is translated to SOME/IP attributes per <<uri-mapping>> table below.
 
 .UUri Mapping
 [[uri-mapping]]
-[cols="1a,1a,3a", options="header"]
+[cols="20%m,20%m,60%a", options="header"]
 |===
 | UUri Portion | SOME/IP Field | Description
 
-| authority_name | IP address & port
+| authority_name m| IP address & port
 | IP address & port (destination endpoint) of the mDevice.
 
 NOTE: *vsomeip* hides IP endpoint information and uses `Service ID` / `Instance ID` instead. *SHOULD* be left blank or mapped (as)
@@ -79,12 +79,12 @@ If the upper 16 bits are `0x0000` (a reserved instance value), `Instance ID` is 
 
 NOTE: Explicitly setting `Instance ID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
 
-| ue_version_major | Interface Version
+| ue_version_major m| Interface Version
 | `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
 
 Maps to `Major Version` for the `Service ID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
 
-| resource_id | Method ID / Event ID a| Identifier of the method/event placed in the
+| resource_id m| Method ID / Event ID a| Identifier of the method/event placed in the
 lower 16 bits of the *SOME/IP Header* `Message ID`. `[PRS_SOMEIP_00034]`
 
 |===
