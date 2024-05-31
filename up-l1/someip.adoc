@@ -62,29 +62,29 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 
 .UUri Mapping
 [[uri-mapping]]
-[cols="10%m,30%m,60%a", options="header"]
+[width="100%",cols="10%,30%,60%", options="header"]
 |===
-| UUri Portion | SOME/IP Field | Description
+m| UUri Portion m| SOME/IP Field a| Description
 
-| authority_name | IP address & port
-| IP address & port (destination endpoint) of the mDevice.
+m| authority_name m| IP address & port
+a| IP address & port (destination endpoint) of the mDevice.
 
 NOTE: *vsomeip* hides IP endpoint information and uses `Service ID` / `Instance ID` instead. *SHOULD* be left blank or mapped (as)
 
-| ue_id | Instance ID \| Service ID
-| `Service ID` *MUST* be encoded in the lower 16 bits of `ue_id`.
+m| ue_id m| Instance ID \| Service ID
+a| `Service ID` *MUST* be encoded in the lower 16 bits of `ue_id`.
 
 `Instance ID` *MAY* be encoded in the upper 16 bits of the 32 bit `ue_id`.
 If the upper 16 bits are `0x0000` (a reserved instance value), `Instance ID` is assumed to be `1`.
 
 NOTE: Explicitly setting `Instance ID` to `0x0001` *SHOULD* be avoided as it increases uProtocol message size.
 
-| ue_version_major m| Interface Version
-| `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
+m| ue_version_major m| Interface Version
+a| `Interface Version` field of *SOME/IP Header*. `[PRS_SOMEIP_00053]`.
 
 Maps to `Major Version` for the `Service ID`. If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
 
-| resource_id | Method ID / Event ID | Identifier of the method/event placed in the
+m| resource_id m| Method ID / Event ID a| Identifier of the method/event placed in the
 lower 16 bits of the *SOME/IP Header* `Message ID`. `[PRS_SOMEIP_00034]`
 
 |===
