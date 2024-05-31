@@ -1,5 +1,6 @@
 = SOME/IP
 :toc:
+:toclevels: 3
 :sectnums:
 
 :plantuml-server-url: http://www.plantuml.com/plantuml
@@ -107,12 +108,12 @@ NOTES::
 .2+^.^h| UMessageType .2+^.^h| SOME/IP Type 2+^.^h| MessageID 2+^.^h| RequestID .2+^.^h| Interface Version .2+^.^h| Return Code (commstatus)
 ^.^h| ServiceID link:#note-1[^(1)^] ^.^h| MethodID ^.^h| ClientID link:#note-4[^(4)^] ^.^h| SessionID
 
-| NOTIFICATION link:#note-5[^(5)^] | REQUEST_NO_RETURN (0x01) | sink.ue_id   | sink.resource_id   | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   |
-| PUBLISH       | NOTIFICATION (0x02)      | source.ue_id  | source.resource_id | sink.ue_id=0    | link:#note-2[^(2)^]       | source.ue_major_version |
-| REQUEST       | REQUEST (0x00)           | sink.ue_id    | sink.resource_id   | source.ue_id=0  | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   | OK
+| NOTIFICATION link:#note-5[^(5)^] | REQUEST_NO_RETURN (0x01) | sink.ue_id   | sink.resource_id | source.ue_id | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   |
+| PUBLISH       | NOTIFICATION (0x02)      | source.ue_id  | source.resource_id | sink.ue_id=0  | link:#note-2[^(2)^]       | source.ue_major_version |
+| REQUEST       | REQUEST (0x00)           | sink.ue_id    | sink.resource_id   | source.ue_id  | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   | OK
 
-.2+.^| RESPONSE .^| RESPONSE (0x80) | sink.ue_id  | sink.resource_id | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version | OK
-                .^| ERROR (0x81)    | sink.ue_id  | sink.resource_id | source.ue_id=0 | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version |  <<commstatus-mapping>>
+.2+.^| RESPONSE .^| RESPONSE (0x80) | sink.ue_id  | sink.resource_id | source.ue_id | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version | OK
+                .^| ERROR (0x81)    | sink.ue_id  | sink.resource_id | source.ue_id | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version |  <<commstatus-mapping>>
 |===
 
 NOTES::
@@ -201,7 +202,7 @@ When receiving a SOME/IP initiated requests:
 |===
 
 
-=== UPayloadFormat
+=== UPayload
 
 `payload` structure, defined in link:../basics/umessage.adoc[UMessage] hosts the application layer data that is being sent between devices.
 `UMessage.attributes` also contains link:../basics/upayloadformat.adoc[UPayloadFormat] used to give a hint of the payload format (protobuf serialized, SOME/IP format, TEXT, RAW, etc...).
