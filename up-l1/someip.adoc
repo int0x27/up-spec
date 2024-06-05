@@ -53,13 +53,14 @@ A search engine usually finds the correct document based on the reference number
 
 == Transport Layer Translation
 
-=== UAttributes
+link:./README.adoc#utransport[Transport layer (uP-L1)] specifies how link:../basics/umessage.adoc[uMessages] are sent and received over a "wire" between *uEs* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping. 
 
-The following table highlights the mapping of *uAttributes* to *SOME/IP* fields that apply to all event types. For more information about *uAttributes*, please refer to link:../basics/uattributes.adoc[uAttributes Specification].
+Mapping of uTransport APIs to SOME/IP specific library *APIs* shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
-==== UUris
+Although some limitations of *vsomeip* library are mentioned bellow as *NOTES*.
 
-*uAttributes Specification* explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message in link:../basics/uri.adoc[`UUri`] format. `UUri` is translated to SOME/IP attributes per <<uri-mapping>> table below.
+=== UUris
+link:../basics/uri.adoc[`UUri`] is translated to SOME/IP attributes per <<uri-mapping>> table below.
 
 .UUri Mapping
 [[uri-mapping]]
@@ -70,7 +71,7 @@ The following table highlights the mapping of *uAttributes* to *SOME/IP* fields 
 | authority_name | IP:port
 | * IP address & port (destination endpoint) of the mDevice.
 
-NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID` instead. +
+NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID`/`InstanceID` instead. +
 *SHOULD* be left blank or mapped via static transport configuration.
 
 | ue_id | InstanceID\|ServiceID
@@ -88,7 +89,6 @@ NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID` / `InstanceID
 
 | resource_id | MethodID/EventID |
 * Identifier of the method/event placed in the lower 16 bits of the *SOME/IP Header* `MessageID`. `[PRS_SOMEIP_00034]`
-
 |===
 
 NOTES::
@@ -98,15 +98,65 @@ NOTES::
 * `InstanceID` is not present in *SOME/IP Header*, but is needed for _Service Discovery_ and events and *MUST* be provided for SOME/IP libraries (e.g. `vsomeip`). `[PRS_SOMEIP_00162]`
 * Additional mappings *MAY* be required by the underlying SOME/IP library, e.g. Service Major/Minor version. Such values *MAY* be pre-configured
 
+=== UAttributes
+
+The following sections highlight the mapping of link:../basics/uattributes.adoc[uAttributes] to *SOME/IP* fields.
+
+==== Common UMessage Attributes
+
+.Common UMessage Attributes
+[[common-umessage-attributes]]
+[cols="1m,4a", options="header,autowidth"]
+|===
+| UMessage | SOME/IP Mapping
+
+| id | UUid to SOME/IP `MessageID` as explained in <<uuid-mapping,UUIds>>.
+
+| priority | Not available in SOME/IP.
+
+* A `NOTIFICATION` *MAY* use the default priority.
+* A `RESPONSE` *SHOULD* use the `REQUEST` priority.
+
+| ttl | Should be checked for incoming `UMESSAGE_TYPE_REQUEST` messages. 
+
+* SOME/IP `REQUEST` *SHOULD* not be sent if incoming UMessage has `ttl > 0` and timestamp from `id` + `ttl` has already expired un *UE* host.
+* If present `ttl` *SHOULD* be used to limit the time a `Request` is kept in the cache for correlation with a `RESPONSE`.
+* If needed `ttl=0` *MAY* be used to indicate `REQUEST_NO_RETURN` (currently not allowed)
+
+NOTE: Unix timestamps between hosts are very likely to be different (even with `ntp`, especially for cloud events), so the transport *MAY* assume the local timestamp of receiving the request, especially for `ttl < 100ms`.
+
+| payload_format | SOME/IP specification however does not have an equivalent field for link:../basics/upayloadformat.adoc[UPayloadFormat].
+
+It is assumed that the payload is serialized in the format that the other end knows how to deserialize (i.e. it is fixed per topic). As such, when converting between uProtocol and SOME/IP, the `payload_format` field *SHOULD* be ignored (left at the default or `UPAYLOAD_FORMAT_UNSPECIFIED`).
+|===
+
+==== Message Type
+
+<<umessagetype-mapping>> table below maps of uProtocol messages to `[PRS_SOMEIP_00055]` SOME/IP message types.
+
+.UMessageType Mapping
+[[umessagetype-mapping]]
+[cols="1m,1m,2a", options="header,autowidth"]
+|===
+| UMessageType | SOME/IP Type | Details
+
+| UMESSAGE_TYPE_PUBLISH | NOTIFICATION | Publish SOME/IP Events.
+| UMESSAGE_TYPE_NOTIFICATION | n/a | Same as SOME/IP `NOTIFICATION`.
+| UMESSAGE_TYPE_REQUEST | REQUEST | RPC Request
+| UMESSAGE_TYPE_RESPONSE | RESPONSE or ERROR | RPC Response or Error has occurred while attempting to deliver the message.
+|===
+
 
 ==== Sink & Source Mapping
+
+*uAttributes* Specification explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message as described in <<uri-mapping>>. 
 
 .SOME/IP to uAttributes Sink & Source Mapping
 [[uattribute-mapping]]
 [cols=".^m,.^m,.^m,.^m,.^m,.^m,.^m,.^m", options="autowidth"]
 |===
 .2+^.^h| UMessageType .2+^.^h| SOME/IP Type 2+^.^h| MessageID 2+^.^h| RequestID .2+^.^h| Interface Version .2+^.^h| Return Code (commstatus)
-^.^h| ServiceID link:#note-1[^(1)^] ^.^h| MethodID ^.^h| ClientID link:#note-4[^(4)^] ^.^h| SessionID
+^.^h| ServiceID link:#note-1[^(1)^] ^.^h| MethodID ^.^h| ClientID link:#note-1[^(1)^],link:#note-4[^(4)^] ^.^h| SessionID
 
 | NOTIFICATION link:#note-5[^(5)^] | REQUEST_NO_RETURN (0x01) | sink.ue_id   | sink.resource_id | source.ue_id | link:#note-2[^(2)^],link:#note-3[^(3)^] | sink.ue_major_version   |
 | PUBLISH       | NOTIFICATION (0x02)      | source.ue_id  | source.resource_id | sink.ue_id=0  | link:#note-2[^(2)^]       | source.ue_major_version |
@@ -121,9 +171,10 @@ NOTES::
  * [[note-2]] ^(2)^ Using session handling so value is increased by 1 until max `0xFFFF` and mapped to `UAttributes.id`
  * [[note-3]] ^(3)^ `source.ue_version_major` missing!
  * [[note-4]] ^(4)^ `ClientID` for vsomeip transport *SHOULD* be set via configuration to `source.ue_id`. It *MUST* be unique for the network.
- * [[note-5]] ^(5)^ `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies for `EventID`.
+ * [[note-5]] ^(5)^ `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies to events (`resource_id > 0x8000`).
 
 
+[[uuid-mapping]]
 ==== UUIDs
 
 link:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
@@ -136,29 +187,6 @@ When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to
 * Generated SOME/IP Responses *MUST* auto-populate the `RequestID` cached from the request message, into the response message and then flush the entry in the cache.
 
 Further details of the usage of IDs for the various message types can be found in the next section.
-
-==== Message Type
-
-<<umessagetype-mapping>> table below maps of uProtocol messages to `[PRS_SOMEIP_00055]` SOME/IP message types.
-
-.UMessageType Mapping
-[[umessagetype-mapping]]
-[cols="1m,1m,2a", options="header,autowidth"]
-|===
-| UMessageType | SOME/IP Type | Details
-
-| UMESSAGE_TYPE_PUBLISH | NOTIFICATION | Publish
-
-| UMESSAGE_TYPE_REQUEST | REQUEST | Requests
-
-| UMESSAGE_TYPE_RESPONSE | RESPONSE or ERROR | Responses or error has occurred while attempting to deliver the message or a service
-has thrown an exception
-
-| UMESSAGE_TYPE_NOTIFICATION | REQUEST_NO_RETURN | Notification
-
-NOTE: SOME/IP Request without response is used as *uProtocol* Notification (with source and sink).
-
-|===
 
 
 When receiving *uProtocol* initiated requests:
@@ -182,7 +210,7 @@ When receiving a SOME/IP initiated requests:
 
 ==== Communication Status
 
-<<commstatus-error-mapping>> below provides the mapping of link:../basics/uattributes.adoc[UAttributes] `commstatus` `UCode` codes to `[PRS_SOMEIP_0019]` SOME/IP error codes.
+<<commstatus-error-mapping>> below provides the mapping of link:../basics/uattributes.adoc[UAttributes] `commstatus` `UCode` codes to SOME/IP error codes `[PRS_SOMEIP_0019]`.
 
 .UCode to SOME/IP Error Code Mapping
 [[commstatus-error-mapping]]
@@ -202,18 +230,12 @@ When receiving a SOME/IP initiated requests:
 |===
 
 
-=== UPayload
-
-`payload` structure, defined in link:../basics/umessage.adoc[UMessage] hosts the application layer data that is being sent between devices.
-`UMessage.attributes` also contains link:../basics/upayloadformat.adoc[UPayloadFormat] used to give a hint of the payload format (protobuf serialized, SOME/IP format, TEXT, RAW, etc...).
-
-The SOME/IP specification however does not have an equivalent field for `UPayloadFormat` as it is assumed that the payload is serialized in the format that the other end knows how to deserialize (i.e. it is fixed per topic). As such, when converting between uProtocol and SOME/IP, the `UPayloadFormat` field *SHOULD* be ignored (left at the default of `UMESSAGE_TYPE_UNSPECIFIED`).
-
 
 === uTransport
 
 Mapping of *uTransport* APIs to SOME/IP specific library APIs shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
+Although some limitations of `vsomeip` library are mentioned as *NOTES*.
 
 == Application Layer Translation
 
