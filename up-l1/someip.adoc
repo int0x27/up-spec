@@ -53,7 +53,7 @@ A search engine usually finds the correct document based on the reference number
 
 == Transport Layer Translation
 
-link:./README.adoc#utransport[Transport layer (uP-L1)] specifies how link:../basics/umessage.adoc[uMessages] are sent and received over a "wire" between *uEs* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping. 
+link:./README.adoc#utransport[Transport layer (uP-L1)] specifies how link:../basics/umessage.adoc[uMessages] are sent and received over a "wire" between *uEs* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping.
 
 Mapping of uTransport APIs to SOME/IP specific library *APIs* shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
@@ -117,7 +117,7 @@ The following sections highlight the mapping of link:../basics/uattributes.adoc[
 * A `NOTIFICATION` *MAY* use the default priority.
 * A `RESPONSE` *SHOULD* use the `REQUEST` priority.
 
-| ttl | Should be checked for incoming `UMESSAGE_TYPE_REQUEST` messages. 
+| ttl | Should be checked for incoming `UMESSAGE_TYPE_REQUEST` messages.
 
 * SOME/IP `REQUEST` *SHOULD* not be sent if incoming UMessage has `ttl > 0` and timestamp from `id` + `ttl` has already expired un *UE* host.
 * If present `ttl` *SHOULD* be used to limit the time a `Request` is kept in the cache for correlation with a `RESPONSE`.
@@ -162,11 +162,10 @@ Further details of the usage of IDs for the various message types is described <
 
 * When receiving *uProtocol* initiated requests:
 
-** *MUST* cache the request `UAttributes` for a maximum of `ttl` so that it can be used to build a response `UAttributes` when receiving a response from SOME/IP. +
-==========
+** *MUST* cache the request `UAttributes` for a maximum of `ttl` so that it can be used to build a response `UAttributes` when receiving a response from SOME/IP.
+
   response.priority = request.priority
   response.reqid = request.id
-==========
 
 * When sending auto-generated SOME/IP *REQUEST* messages:
 
@@ -180,7 +179,7 @@ Further details of the usage of IDs for the various message types is described <
 
 ==== Sink & Source Mapping
 
-*uAttributes* Specification explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message as described in <<uri-mapping>>. 
+*uAttributes* Specification explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message as described in <<uri-mapping>>.
 
 .SOME/IP to uAttributes Sink & Source Mapping
 [[uattribute-mapping]]
