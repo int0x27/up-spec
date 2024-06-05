@@ -130,6 +130,20 @@ NOTE: Unix timestamps between hosts are very likely to be different (even with `
 It is assumed that the payload is serialized in the format that the other end knows how to deserialize (i.e. it is fixed per topic). As such, when converting between uProtocol and SOME/IP, the `payload_format` field *SHOULD* be ignored (left at the default or `UPAYLOAD_FORMAT_UNSPECIFIED`).
 |===
 
+[[uuid-mapping]]
+==== UUIDs
+
+link:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
+
+The *UUid* is used for correlate between request and response as well. SOME/IP instead defines the `RequestID` as 16 bit `ClientID` + 16 bit `SessionID` (that is incremented). `[PRS_SOMEIP_00046]`
+
+* When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `RequestID` and uProtocol `UUID` are properly mapped, especially when corelating a request to a response.
+
+* Generated SOME/IP Events *MUST* set the 16 bit `ClientID` to 0 per `[PRS_SOMEIP_00925]`
+* Generated SOME/IP Responses *MUST* auto-populate the `RequestID` cached from the request message, into the response message and then flush the entry in the cache.
+
+Further details of the usage of IDs for the various message types is described <<umessagetype-mapping,below>>.
+
 ==== Message Type
 
 <<umessagetype-mapping>> table below maps of uProtocol messages to `[PRS_SOMEIP_00055]` SOME/IP message types.
@@ -145,6 +159,23 @@ It is assumed that the payload is serialized in the format that the other end kn
 | UMESSAGE_TYPE_REQUEST | REQUEST | RPC Request
 | UMESSAGE_TYPE_RESPONSE | RESPONSE or ERROR | RPC Response or Error has occurred while attempting to deliver the message.
 |===
+
+* When receiving *uProtocol* initiated requests:
+
+** *MUST* cache the request `UAttributes` for a maximum of `ttl` so that it can be used to build a response `UAttributes` when receiving a response from SOME/IP. +
+==========
+  response.priority = request.priority
+  response.reqid = request.id
+==========
+
+* When sending auto-generated SOME/IP *REQUEST* messages:
+
+  ** *MUST* cache the message's `RequestID` to correlate with the RESPONSE message.
+  ** Underlying SOME/IP library *MAY* handle `RequestID` updating automatically.
+
+* When receiving a SOME/IP initiated requests:
+
+  ** *MUST* cache the SOME/IP `RequestID` as well as the generated `UAttributes` for the request messages so that the response can be translated back to a SOME/IP _RESPONSE_ message
 
 
 ==== Sink & Source Mapping
@@ -174,40 +205,6 @@ NOTES::
  * [[note-5]] ^(5)^ `REQUEST_NO_RETURN` is a Request in SOME/IP that applies to `MethodID`, but in uProtocol `NOTIFICATION` applies to events (`resource_id > 0x8000`).
 
 
-[[uuid-mapping]]
-==== UUIDs
-
-link:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
-
-The *UUid* is used for correlate between request and response as well. SOME/IP instead defines the `RequestID` as 16 bit `ClientID` + 16 bit `SessionID` (that is incremented). `[PRS_SOMEIP_00046]`
-
-When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `RequestID` and uProtocol `UUID` are properly mapped, especially when corelating a request to a response.
-
-* Generated SOME/IP Events *MUST* set the 16 bit `ClientID` to 0 per `[PRS_SOMEIP_00925]`
-* Generated SOME/IP Responses *MUST* auto-populate the `RequestID` cached from the request message, into the response message and then flush the entry in the cache.
-
-Further details of the usage of IDs for the various message types can be found in the next section.
-
-
-When receiving *uProtocol* initiated requests:
-
-* *MUST* cache the request `UAttributes` for a maximum of `ttl` so that it can be used to build a response `UAttributes` when receiving a response from SOME/IP.
-
-```
-response.priority = request.priority
-response.reqid = request.id
-```
-
-* When sending auto-generated SOME/IP *REQUEST* messages:
-
-  ** *MUST* cache the message's `RequestID` to correlate with the RESPONSE message.
-  ** Underlying SOME/IP library *SHOULD* handle `RequestID` updating.
-
-When receiving a SOME/IP initiated requests:
-
-  * *MUST* cache the SOME/IP `RequestID` as well as the generated `UAttributes` for the request messages so that the response can be translated back to a SOME/IP _RESPONSE_ message
-
-
 ==== Communication Status
 
 <<commstatus-error-mapping>> below provides the mapping of link:../basics/uattributes.adoc[UAttributes] `commstatus` `UCode` codes to SOME/IP error codes `[PRS_SOMEIP_0019]`.
@@ -229,13 +226,6 @@ When receiving a SOME/IP initiated requests:
 | FAILED_PRECONDITION | E_WRONG_PROTOCOL_VERSION / E_WRONG_INTERFACE_VERSION
 |===
 
-
-
-=== uTransport
-
-Mapping of *uTransport* APIs to SOME/IP specific library APIs shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
-
-Although some limitations of `vsomeip` library are mentioned as *NOTES*.
 
 == Application Layer Translation
 
