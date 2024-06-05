@@ -167,6 +167,9 @@ Further details of the usage of IDs for the various message types is described <
   response.priority = request.priority
   response.reqid = request.id
 
+** *MUST* clean up the cache after the `ttl` has expired and send an Error `UMESSAGE_TYPE_RESPONSE`
+** *MUST* ignore incoming SOME/IP Response(s) for an expired Request.
+
 * When sending auto-generated SOME/IP *REQUEST* messages:
 
   ** *MUST* cache the message's `RequestID` to correlate with the RESPONSE message.
